@@ -2,12 +2,14 @@
 using Gremlin.Net;
 using Gremlin.Net.Driver;
 using Gremlin.Net.Driver.Exceptions;
+using Gremlin.Net.Structure;
 using Gremlin.Net.Structure.IO.GraphSON;
 using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
 using QuickGraph;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -28,9 +30,6 @@ namespace GraphExp.Models
         {
             _paymentGraph = new BidirectionalGraph<Vertex, Edge<Vertex>>();
 
-            // AddPiidEvent(new PostPiidEvent { invoiceId = "invoiceId1", piid = "piid1", vpa = "add bse65 image1", secureDataId = "secureDataId1" });
-            // AddPiidEvent(new PostPiidEvent { invoiceId = "invoiceId2", piid = "piid2", vpa = "add bse65 image2", secureDataId = "secureDataId2" });
-            // AddPiidEvent(new PostPiidEvent { invoiceId = "invoiceId3", piid = "piid3", vpa = "add bse65 image3", secureDataId = "secureDataId2" });
             var vertexAccountId = new Vertex { VertexType = "accountIdType", VertexValue = "accountId1" };
             var vertexSecureDataId = new Vertex { VertexType = "secureDataIdType", VertexValue = "secureDataId1" };
             var vertexPiid = new Vertex { VertexType = "piidType", VertexValue = "piid1" };
@@ -43,59 +42,60 @@ namespace GraphExp.Models
             _paymentGraph.AddEdge(new Edge<Vertex>(vertexSecureDataId, vertexPiid));
 
             // GREMLIN part
-            server = new GremlinServer(
-                hostname: "localhost",
-                port: 65400,
-                username: "/dbs/db1/colls/coll1",
-                password: "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="
+        server = new GremlinServer(
+             hostname: "graph-exp.gremlin.cosmosdb.azure.com",
+             port: 443,
+             username: "/dbs/db1/colls/graph1",
+             password: "a0WHFzoZ9tjJwkrRAOC9wCpY9ShkQlaxIFHLNWJsWShTFslibhphc8XdXquPksiJYsV8GDTQSArbACDbRaXjfg==",
+             enableSsl: true
             );
 
-                client = new GremlinClient(
-                gremlinServer: server,
-                new GraphSON2Reader(),
-                new GraphSON2Writer(),
-                GremlinClient.GraphSON2MimeType);
+        client = new GremlinClient(server, new GraphSON2Reader(), new GraphSON2Writer(), GremlinClient.GraphSON2MimeType);
 
-            gremlinQueries = new Dictionary<string, string>();
-            // gremlinQueries.Add("Cleanup", "g.V().drop()");
+        /*server = new GremlinServer(
+            hostname: "localhost",
+            port: 65400,
+            username: "/dbs/db1/colls/coll1",
+            password: "a0WHFzoZ9tjJwkrRAOC9wCpY9ShkQlaxIFHLNWJsWShTFslibhphc8XdXquPksiJYsV8GDTQSArbACDbRaXjfg=="
+        );
 
-            // create starter payment graph sample database1
-            var secureDataId1 = "secureDataId1";
-            var accountId1 = "accountId1";
-            var piid1 = "piid1";
-            var txn1 = new Dictionary<string, string> { { "txnId", "txnId1" }, { "amount", "20" } };
-            gremlinQueries.Add($"AddVertex + {secureDataId1}", $"g.addV('secureDataId').property('value', '{secureDataId1}').property('timestamp','{DateTime.UtcNow.Date}' )");
-            gremlinQueries.Add($"AddVertex + {accountId1}", $"g.addV('accountId').property('value', '{accountId1}').property('timestamp','{DateTime.UtcNow.Date}' )");
-            gremlinQueries.Add($"AddVertex + {piid1}", $"g.addV('piid').property('value', '{piid1}').property('timestamp','{DateTime.UtcNow.Date}' )");
-            gremlinQueries.Add($"AddVertex + {txn1}", $"g.addV('txn').property('value', '{txn1}').property('timestamp','{DateTime.UtcNow.Date}' )");
-            gremlinQueries.Add($"AddEdge + between secureDataId1 and piid1", $"g.V('{secureDataId1}').addE('Associated PIID').to(g.V('{piid1}'))");
-            gremlinQueries.Add($"AddEdge + between piid1 and accountId1", $"g.V('{piid1}').addE('Associated accountId').to(g.V('{accountId1}'))");
+            client = new GremlinClient(
+            gremlinServer: server,
+            new GraphSON2Reader(),
+            new GraphSON2Writer(),
+            GremlinClient.GraphSON2MimeType);*/
+        
+        gremlinQueries = new Dictionary<string, string>();
+        // gremlinQueries.Add("Cleanup", "g.V().drop()");
 
-            foreach (var query in gremlinQueries)
-            {
-                Console.WriteLine(String.Format("Running this query: {0}: {1}", query.Key, query.Value));
+            /*
+        var secureDataId1 = "secureDataId1";
+        var accountId1 = "accountId1";
+        var piid1 = "piid1";
+        var txn1 = new Dictionary<string, string> { { "txnId", "txnId1" }, { "amount", "20" } };
+        gremlinQueries.Add($"AddVertex + {secureDataId1}", $"g.addV('secureDataId').property('id', '{secureDataId1}').property('value', '{secureDataId1}').property('timestamp','{DateTime.UtcNow.Date}' )");
+        gremlinQueries.Add($"AddVertex + {accountId1}", $"g.addV('accountId').property('id', '{accountId1}').property('value', '{accountId1}').property('timestamp','{DateTime.UtcNow.Date}' )");
+        gremlinQueries.Add($"AddVertex + {piid1}", $"g.addV('piid').property('id', '{piid1}').property('value', '{piid1}').property('timestamp','{DateTime.UtcNow.Date}' )");
+        gremlinQueries.Add($"AddVertex + {txn1}", $"g.addV('txn').property('id', '{txn1}').property('txnId', '{txn1["txnId"]}').property('amount', '{txn1["amount"]}').property('timestamp','{DateTime.UtcNow.Date}' )");
+        gremlinQueries.Add($"AddEdge + between secureDataId1 and piid1", $"g.V('{secureDataId1}').addE('Associated PIID').to(g.V('{piid1}'))");
+        gremlinQueries.Add($"AddEdge + between piid1 and accountId1", $"g.V('{piid1}').addE('Associated accountId').to(g.V('{accountId1}'))");
+        gremlinQueries.Add($"AddEdge + between accountid1 and txn1", $"g.V('{accountId1}').addE('Associated txn').to(g.V('{txn1}'))");
+        gremlinQueries.Add($"AddEdge + between accountid1 and piid1", $"g.V('{accountId1}').addE('Associated piid').to(g.V('{piid1}'))");
 
-                // Create async task to execute the Gremlin query.
-                var resultSet = SubmitRequest(client, query.Value).Result;
-                outputData(resultSet);
-            }
+        foreach (var query in gremlinQueries)
+        {
+            Console.WriteLine(String.Format("Running this query: {0}: {1}", query.Key, query.Value));
 
-            Console.WriteLine("Output query response\n");
+            // Create async task to execute the Gremlin query.
+            var resultSet = SubmitRequest(client, query.Value).Result;
+            outputData(resultSet);
         }
 
-        /*public IEnumerable<PostPiidEvent> GetAll()
-        {
-            return Payments;
-        }*/
-        /*public PostPiidEvent Get(string accountId)
-        {
-            // return Payments.Find(p => string.Equals(p.accountId, accountId));
-            return _paymentGraph.Vertices.Where(p => p.VertexType == "accountIdType");
+        Console.WriteLine("Output query response\n");*/
+    }
 
-        }*/
-        public IEnumerable<string> GetAllPiidAndTxn(string accountId)
+    public IEnumerable<string> GetAllPiidAndTxn(string accountId)
         {
-            // return Payments.Find(p => string.Equals(p.accountId, accountId));
             var getAccountIdNode = _paymentGraph.Vertices.FirstOrDefault(p => p.VertexType == "accountIdType" && p.VertexValue == accountId);
             var allAccountIds = new List<string>();
             foreach (var edge in _paymentGraph.OutEdges(getAccountIdNode))
@@ -109,8 +109,7 @@ namespace GraphExp.Models
 
         public IEnumerable<string> GetActivePIsBySecureDataId(string secureDataId)
         {
-            // return Payments.FindAll(p => string.Equals(p.secureDataId, secureDataId));
-            var getSecureIdNode = _paymentGraph.Vertices.FirstOrDefault(p => p.VertexType == "secureDataIdType" && p.VertexValue == secureDataId);
+            /*var getSecureIdNode = _paymentGraph.Vertices.FirstOrDefault(p => p.VertexType == "secureDataIdType" && p.VertexValue == secureDataId);
             var allAccountIds = new List<string>();
 
             // Get all outgoing edges from the given vertex
@@ -124,13 +123,22 @@ namespace GraphExp.Models
                         allAccountIds.Add(edge2.Target.VertexValue);
                     }
                 }
-            }
-            return allAccountIds;
+            }*/
+
+            // GREMLIN
+            var queryScript = $"g.V().hasLabel('secureDataId').has('id', '{secureDataId}').outE('Associated PIID').inV().hasLabel('piid').outE('Associated accountId').inV()";
+            var queryRes = SubmitRequest(client, queryScript).Result;
+            outputData(queryRes);
+            var response = JsonConvert.SerializeObject(queryRes);
+            List<string> responseList = new List<string>();
+            responseList.Add(response);
+
+            // return allAccountIds;
+            return responseList;
         }
 
         public List<Vertex> GetAlias(PostPiidEvent alias)
         {
-            // return Payments.Find(p => string.Equals(p.secureDataId, alias.secureDataId) && string.Equals(p.accountId, alias.accountId));
             var getAccountIdNode = _paymentGraph.Vertices.FirstOrDefault(p => p.VertexType == "accountIdType" && p.VertexValue == alias.accountId);
             var connectedNodes = new List<Vertex>();
 
@@ -147,6 +155,14 @@ namespace GraphExp.Models
             }
 
             return connectedNodes;
+
+            // GREMLIN
+            /*var queryScript = $"g.V().hasLabel('accountId').has('id', '{alias.accountId}').outE('Associated PIID').inV().hasLabel('piid').has('id', '{alias.piid}')";
+            var queryRes = SubmitRequest(client, queryScript).Result;
+            outputData(queryRes);
+            var response = JsonConvert.SerializeObject(queryRes);
+            List<string> responseList = new List<string>();*/
+
         }
 
         public bool AddTransactionEvent(PostTransactionEvent item)
@@ -156,23 +172,11 @@ namespace GraphExp.Models
                 throw new ArgumentNullException("item");
             }
 
-            /*if (item.accountId == null)
-            {
-                item.accountId = Guid.NewGuid().ToString();
-            }
-            Payments.Add(item);
-            return item;
-            */
             var sourcePiidVertex = new Vertex();
             var sourceAccountIdVertex = _paymentGraph.Vertices.FirstOrDefault(p => p.VertexType == "accountIdType" && p.VertexValue == item.accountId);
             if (sourceAccountIdVertex == null)
             {
                 throw new InvalidOperationException("Source vertex not found");
-                /*sourceAccountIdVertex = new Vertex { VertexType = "accountIdType", VertexValue = item.accountId };
-                _paymentGraph.AddVertex(sourceAccountIdVertex);
-                sourcePiidVertex = new Vertex { VertexType = "piidType", VertexValue = item.piid };
-                _paymentGraph.AddVertex(sourcePiidVertex);
-                _paymentGraph.AddEdge(new Edge<Vertex>(sourceAccountIdVertex, sourcePiidVertex));*/
             }
             else
             {
@@ -203,13 +207,6 @@ namespace GraphExp.Models
                 throw new ArgumentNullException("item");
             }
 
-            /*if (item.accountId == null)
-            {
-                item.accountId = Guid.NewGuid().ToString();
-            }
-            Payments.Add(item);
-            return item;
-            */
             var sourcePiidVertex = new Vertex();
             var sourceAccountIdVertex = _paymentGraph.Vertices.FirstOrDefault(p => p.VertexType == "accountId" && p.VertexValue == item.accountId);
             if (sourceAccountIdVertex == null)
@@ -235,17 +232,21 @@ namespace GraphExp.Models
             if (sourceSecureDataIdVertex == null)
             {
                 sourceSecureDataIdVertex = new Vertex { VertexType = "secureDataIdType", VertexValue = item.secureDataId };
+                _paymentGraph.AddVertex(sourceSecureDataIdVertex);
             }
 
-            // check logic once
-            _paymentGraph.AddVertex(new Vertex { VertexType = "secureDataIdType", VertexValue = item.secureDataId });
+            // _paymentGraph.AddVertex(new Vertex { VertexType = "secureDataIdType", VertexValue = item.secureDataId });
             _paymentGraph.AddEdge(new Edge<Vertex>(sourcePiidVertex, sourceSecureDataIdVertex));
             _paymentGraph.AddEdge(new Edge<Vertex>(sourceSecureDataIdVertex, sourcePiidVertex));
 
             // GREMLIN
-            var gremline_test_secureDataId1 = "gremline_test_secureDataId1";
-            gremlinQueries.Add($"AddVertex + {gremline_test_secureDataId1}", $"g.addV('secureDataId').property('id', '{gremline_test_secureDataId1}').property('partitionId','{gremline_test_secureDataId1}' )");
-            // Create DB
+            // var addPiidEvent_secureDataId1 = "gremline_test_secureDataId1";
+            /*gremlinQueries = new Dictionary<string, string>();
+            var accountId = "tobefilled";
+            var piid = item.piid;
+
+            gremlinQueries.Add($"Find if account exists already + {item}", $"g.V().hasLabel('accountId').has('value._value', {item.accountId}).inV().hasLabel('piid').outE('Associated Account').inV()");
+
             foreach (var query in gremlinQueries)
             {
                 Console.WriteLine(String.Format("Running this query: {0}: {1}", query.Key, query.Value));
@@ -254,7 +255,7 @@ namespace GraphExp.Models
                 var resultSet = SubmitRequest(client, query.Value).Result;
                 outputData(resultSet);
             }
-            Console.WriteLine("Output query response\n");
+            Console.WriteLine("Output query response\n");*/
 
             return true;
         }
@@ -295,60 +296,5 @@ namespace GraphExp.Models
         {
             return _paymentGraph.Vertices.FirstOrDefault(v => v.VertexType == vertexType && v.VertexValue == vertexValue);
         }
-
-        /*public void AddOutgoingNode(Vertex sourceVertex, Vertex targetVertex)
-        {
-            if (sourceVertex == null || targetVertex == null)
-            {
-                throw new ArgumentNullException("Source or target vertex cannot be null");
-            }
-
-            _paymentGraph.AddVertex(targetVertex);
-            _paymentGraph.AddEdge(new Edge<Vertex>(sourceVertex, targetVertex));
-        }*/
-
-        /*public PostTransactionEvent Add2(PostTransactionEvent item)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException("item");
-            }
-            if (item.accountId == null)
-            {
-                item.accountId = Guid.NewGuid().ToString();
-            }
-            Payments.Add(item);
-            return item;
-        }
-
-        public void Remove(string id)
-        {
-            Payments.RemoveAll(p => string.Equals(p.accountId, id));
-        }
-
-        public PostPiidEvent Update(PostPiidEvent item)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException("item");
-            }
-
-            var profile = Payments.Find(p => string.Equals(p.piid, item.piid));
-
-            if (profile == null)
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
-
-            UpdateProfileHelper(profile, item);
-
-            return item;
-        }
-
-        public static void UpdateProfileHelper(PostPiidEvent oldProfile, PostPiidEvent newProfile)
-        {
-            oldProfile.tokenExpiry = newProfile.tokenExpiry;
-        }
-        */
     }
 }

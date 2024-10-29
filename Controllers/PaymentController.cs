@@ -28,9 +28,6 @@ namespace GraphExp.Controllers
             bool piidAdded = repository.AddPiidEvent(item);
             var response = Request.CreateResponse<PostPiidEvent>(HttpStatusCode.Created, item);
 
-            // why add location of newly created resource in header response?(When the server creates a resource, it should include the URI of the new resource in the Location header of the response.)
-            // string uri = Url.Link("DefaultApi", new { id = item.userId });
-            // response.Headers.Location = new Uri(uri);
             return response;
         }
 
@@ -46,9 +43,6 @@ namespace GraphExp.Controllers
             var result = repository.AddTransactionEvent(item);
             var response = Request.CreateResponse<PostTransactionEvent>(HttpStatusCode.Created, item);
 
-            // why add location of newly created resource in header response?(When the server creates a resource, it should include the URI of the new resource in the Location header of the response.)
-            // string uri = Url.Link("DefaultApi", new { id = item.userId });
-            // response.Headers.Location = new Uri(uri);
             return response;
         }
 
@@ -73,36 +67,5 @@ namespace GraphExp.Controllers
             }
             return item;
         }
-
-
-       /* public IEnumerable<PostPiidEvent> GetAllProfiles()
-        {
-            return repository.GetAll();
-        }
-
-        public PostPiidEvent GetPaymentInstrument(string accountId)
-        {
-            PostPiidEvent item = repository.Get(accountId);
-            if (item == null)
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
-            return item;
-        }
-
-
-        [System.Web.Http.HttpPost]
-        [Route("api/payment/deletePiid")]
-        public void DeletePiid([FromBody] string piid)
-        {
-            PostPiidEvent item = repository.Get(piid);
-            if (item == null)
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
-
-            repository.Remove(piid);
-        }
-       */
     }
 }
