@@ -42,11 +42,11 @@ namespace GraphExp.Models
             _paymentGraph.AddEdge(new Edge<Vertex>(vertexSecureDataId, vertexPiid));
 
             // GREMLIN part
+            // add passwork below
         server = new GremlinServer(
              hostname: "graph-exp.gremlin.cosmosdb.azure.com",
              port: 443,
              username: "/dbs/db1/colls/graph1",
-             password: "a0WHFzoZ9tjJwkrRAOC9wCpY9ShkQlaxIFHLNWJsWShTFslibhphc8XdXquPksiJYsV8GDTQSArbACDbRaXjfg==",
              enableSsl: true
             );
 
@@ -56,7 +56,6 @@ namespace GraphExp.Models
             hostname: "localhost",
             port: 65400,
             username: "/dbs/db1/colls/coll1",
-            password: "a0WHFzoZ9tjJwkrRAOC9wCpY9ShkQlaxIFHLNWJsWShTFslibhphc8XdXquPksiJYsV8GDTQSArbACDbRaXjfg=="
         );
 
             client = new GremlinClient(
